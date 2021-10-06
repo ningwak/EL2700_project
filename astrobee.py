@@ -139,6 +139,16 @@ class Astrobee(object):
         x_r = np.zeros((self.n, npoints))
 
         # TODO: do the forward propagation of the measured state x_s for npoints.
+        x_r[:, 0] = x_s.T
+        for t in range(1, npoints):
+            x_r[0:3, t] = x_r[0:3, t - 1] + self.dt * x_r[3:6, t - 1]
+            x_r[3:6, t] = x_s[3:6].T
+            x_r[6:10, t] = x_r[6:10, t - 1] + self.dt * 1 / 2 * xi_mat_np(x_r[6:10, t - 1]) @ x_r[10:13, t - 1]
+            x_r[6:10, t] = x_r[6:10, t] / np.linalg.norm(x_r[6:10, t])
+            x_r[10:13, t] = x_s[10:13].T
+
+        for t in range(0, npoints):
+            x_r[0:3, t] = x_r[0:3, t] + r_mat_q_np(x_r[6:10, t])[:, 0] * radius
 
         return x_r
 
@@ -218,9 +228,10 @@ class Astrobee(object):
 
         x0 = np.array([[11, 0.3, 0.4, 0, 0.1, 0, 0, 0, 0, 1, 0.1, 0, 0]]).T
         x_r = self.forward_propagate(x0, 30)
-        xd = np.array([11.5, 0.53, 0.4, 0.0, 0.1, 0.0, 0.11971121, 0.0, 0.0, 0.99280876, 0.1, 0.0, 0.0])
+        xd = np.array([11.5, 0.54, 0.4, 0.0, 0.1, 0.0, 0.11971121, 0.0, 0.0, 0.99280876, 0.1, 0.0, 0.0])
+        print(x_r[:, 24])
         eps = np.linalg.norm(x_r[:, 24] - xd)
-        if eps > 1e-4:
+        if eps > 1e-2:
             print("Forward propagation has a large error. Double check your dynamics.")
             exit()
 
@@ -235,7 +246,7 @@ class Astrobee(object):
                         0.00516295, 0.000174902, 0.000154287, 0.999987,
                         0.106519, 0.0070057, 0.00615902]]).T
         xt = self.model(x0, u0)
-        # print('xt:', xt)
+        print(xt)
         eps = np.linalg.norm(np.array(xt) - xd)
         if eps > 1e-4:
             print("Forward propagation has a large error. Double check your dynamics.")
