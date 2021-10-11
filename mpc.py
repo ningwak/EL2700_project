@@ -21,7 +21,7 @@ class MPC(object):
                  param='P1', N=10, trajectory_tracking=False,
                  ulb=None, uub=None, xlb=None, xub=None,
                  terminal_constraint=None, tuning_file=None,
-                 solver_opts=None):
+                 solver_opts=None, optimizer='ipopt'):
         """
         Constructor for the MPC class.
 
@@ -51,6 +51,9 @@ class MPC(object):
                             solver_opts['print_time'] = False
                             solver_opts['ipopt.tol'] = 1e-8
         :type solver_opts: dictionary, optional
+        ---
+        :param optimizer:
+        :type optimizer: string
         """
 
         # State flags
@@ -182,16 +185,28 @@ class MPC(object):
         self.con_ub = ca.vertcat(con_eq_ub, *con_ineq_ub)
 
         # Build NLP Solver (can also solve QP)
+        # FIXME: add optmizer
         nlp = dict(x=opt_var, f=obj, g=con, p=param_s)
-        options = {
-            'ipopt.print_level': 0,
-            'print_time': False,
-            'verbose': False,
-            'expand': True
-        }
+
+        if optimizer == 'ipopt':
+            options = {
+                'ipopt.print_level': 0,
+                'print_time': False,
+                'verbose': False,
+                'expand': True
+            }
+        # else:
+        #     options = {
+        #         'print_time': False,
+        #         'verbose': False,
+        #         'expand': True
+        #     }     
+        else:
+            options = {}
+
         if solver_opts is not None:
             options.update(solver_opts)
-        self.solver = ca.nlpsol('mpc_solver', 'ipopt', nlp, options)
+        self.solver = ca.nlpsol('mpc_solver', optimizer, nlp, options)
 
         build_solver_time += time.time()
         print('\n________________________________________')

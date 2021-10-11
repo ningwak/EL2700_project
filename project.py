@@ -33,6 +33,7 @@ ctl = MPC(model=abee,
           xlb=-x_lim, xub=x_lim,
           tuning_file=tuning_file_path)
 
+
 # Q2: Reference tracking
 # TODO(done): adjust the tuning.yaml parameters for better performance
 x_d = abee.get_static_setpoint()
@@ -46,6 +47,7 @@ sim_env = EmbeddedSimEnvironment(model=abee,
 t, y, u = sim_env.run(x0)
 sim_env.visualize()  # Visualize state propagation
 
+
 # Q3: Activate Tracking
 # TODO: complete the MPC class for reference tracking
 tracking_ctl = MPC(model=abee,
@@ -54,7 +56,8 @@ tracking_ctl = MPC(model=abee,
                    N=MPC_HORIZON,
                    trajectory_tracking=True,
                    ulb=-u_lim, uub=u_lim,
-                   xlb=-x_lim, xub=x_lim)
+                   xlb=-x_lim, xub=x_lim,
+                   optimizer="ipopt")
 sim_env_tracking = EmbeddedSimEnvironment(model=abee,
                                           dynamics=abee.model,
                                           controller=tracking_ctl.mpc_controller,
