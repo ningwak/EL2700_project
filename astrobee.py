@@ -17,7 +17,6 @@ class Astrobee(object):
                  **kwargs):
         """
         Astrobee Robot, NMPC tester class.
-
         :param mass: mass of the Astrobee
         :type mass: float
         :param inertia: inertia tensor of the Astrobee
@@ -59,7 +58,6 @@ class Astrobee(object):
     def astrobee_dynamics_quat(self, x, u):
         """
         Astrobee nonlinear dynamics with Quaternions.
-
         :param x: state
         :type x: ca.MX
         :param u: control input
@@ -125,10 +123,8 @@ class Astrobee(object):
     def forward_propagate(self, x_s, npoints, radius=0.5):
         """
         Forward propagate the observed state given a constant velocity.
-
         The output should be a self.n x npoints matrix, with the
         desired offset track.
-
         :param x_s: starting state
         :type x_s: np.ndarray
         :param npoints: number of points to propagate
@@ -145,12 +141,15 @@ class Astrobee(object):
             x_r[0:3, t] = x_r[0:3, t - 1] + self.dt * x_r[3:6, t - 1]
             x_r[3:6, t] = x_s[3:6].T
             # x_r[6:10, t] = x_r[6:10, t - 1] + self.dt * 1 / 2 * xi_mat_np(x_r[6:10, t - 1]) @ x_r[10:13, t - 1]
-            x_r[6:10, t] = x_r[6:10, t - 1] + self.dt * 1 / 2 * np.dot(xi_mat_np(x_r[6:10, t - 1]),x_r[10:13, t - 1])
+            x_r[6:10, t] = x_r[6:10, t - 1] + self.dt * 1 / 2 * np.dot(xi_mat_np(x_r[6:10, t - 1]), x_r[10:13, t - 1])
             x_r[6:10, t] = x_r[6:10, t] / np.linalg.norm(x_r[6:10, t])
             x_r[10:13, t] = x_s[10:13].T
 
-        for t in range(0, npoints):
-            x_r[0:3, t] = x_r[0:3, t] + r_mat_q_np(x_r[6:10, t])[:, 0] * radius
+        # for t in range(0, npoints):
+        #     x_r[0:3, t] = x_r[0:3, t] + r_mat_q_np(x_r[6:10, t])[:, 0] * radius
+        for t in range(0, npoints - 1):
+            x_r[0:3, t] = x_r[0:3, t + 1] + r_mat_q_np(x_r[6:10, t + 1])[:, 0] * radius
+        x_r[0:3, npoints - 1] = x_r[0:3, npoints - 1] + r_mat_q_np(x_r[6:10, npoints - 1])[:, 0] * radius
 
         return x_r
 
@@ -184,7 +183,6 @@ class Astrobee(object):
     def get_initial_pose(self):
         """
         Helper function to get a starting state, depending on the dynamics type.
-
         :return: starting state
         :rtype: np.ndarray
         """
@@ -206,7 +204,6 @@ class Astrobee(object):
     def get_limits(self):
         """
         Get Astrobee control and state limits for ISS
-
         :return: state and control limits
         :rtype: np.ndarray, np.ndarray
         """
