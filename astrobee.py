@@ -89,7 +89,8 @@ class Astrobee(object):
         pdot[:] = v
         vdot[:] = ca.mtimes([1 / self.mass, r_mat_q(q), f])
         qdot[:] = ca.mtimes([0.5, xi_mat(q), w])
-        wdot[:] = ca.mtimes(ca.inv(self.inertia), (tau - ca.cross(w, ca.mtimes(self.inertia, w))))
+        # wdot[:] = ca.mtimes(ca.inv(self.inertia), (tau - ca.cross(w, self.inertia @ w)))
+        wdot[:] = ca.mtimes(ca.inv(self.inertia), (tau - ca.cross(w, ca.mtimes(self.inertia,w))))
 
         dxdt = [pdot, vdot, qdot, wdot]
 
@@ -143,7 +144,8 @@ class Astrobee(object):
         for t in range(1, npoints):
             x_r[0:3, t] = x_r[0:3, t - 1] + self.dt * x_r[3:6, t - 1]
             x_r[3:6, t] = x_s[3:6].T
-            x_r[6:10, t] = ca.mtimes(x_r[6:10, t - 1] + self.dt * 1 / 2 * xi_mat_np(x_r[6:10, t - 1]), x_r[10:13, t - 1])
+            # x_r[6:10, t] = x_r[6:10, t - 1] + self.dt * 1 / 2 * xi_mat_np(x_r[6:10, t - 1]) @ x_r[10:13, t - 1]
+            x_r[6:10, t] = x_r[6:10, t - 1] + self.dt * 1 / 2 * np.dot(xi_mat_np(x_r[6:10, t - 1]),x_r[10:13, t - 1])
             x_r[6:10, t] = x_r[6:10, t] / np.linalg.norm(x_r[6:10, t])
             x_r[10:13, t] = x_s[10:13].T
 
