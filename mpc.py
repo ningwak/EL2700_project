@@ -59,6 +59,8 @@ class MPC(object):
 
         build_solver_time = -time.time()
         self.model = model
+        self.model.mass = 9.65
+        self.model.inertia = np.diag([0.1550, 0.1430, 0.1620])
         self.dt = model.dt
         self.Nx, self.Nu = model.n, model.m
         self.Nt = N
@@ -88,12 +90,13 @@ class MPC(object):
         # Starting state parameters - add slack here
         x0 = ca.MX.sym('x0', self.Nx)
         if self.trajectory_tracking:
-            # TODO: remove 'raise NotImplementedError' and create the desired symbolic param
-            x_ref = ca.MX.sym('x_ref', self.Nx,)
+            # TODO(done): remove 'raise NotImplementedError' and create the desired symbolic param
+            x_ref = ca.MX.sym('x_ref', self.Nx * (self.Nt + 1),)
         else:
             x_ref = ca.MX.sym('x_ref', self.Nx,)
         u0 = ca.MX.sym('u0', self.Nu)
         param_s = ca.vertcat(x0, x_ref, u0)
+        print(param_s)
 
         # Create optimization variables
         opt_var = ctools.struct_symMX([(ctools.entry('u', shape=(self.Nu,), repeat=self.Nt),
@@ -120,8 +123,8 @@ class MPC(object):
             # Get variables
             x_t = opt_var['x', t]
             if self.trajectory_tracking:
-                # TODO: remove 'raise NotImplementedError' and obtain the desired step in the reference trajectory
-                x_r = self.x_sp
+                # TODO(done): remove 'raise NotImplementedError' and obtain the desired step in the reference trajectory
+                x_r = x_ref[(t * self.Nx):((t + 1) * self.Nx)]
             else:
                 x_r = x_ref
             u_t = opt_var['u', t]
