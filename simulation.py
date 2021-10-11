@@ -10,7 +10,6 @@ class EmbeddedSimEnvironment(object):
         """
         Embedded simulation environment. Simulates the syste given dynamics
         and a control law, plots in matplotlib.
-
         :param model: model object
         :type model: object
         :param dynamics: system dynamics function (x, u)
@@ -43,16 +42,17 @@ class EmbeddedSimEnvironment(object):
 
             # Get control input and obtain next state
             x = x_vec[:, -1].reshape(self.model.n, 1)
-            x_pst = np.zeros((self.model.n, 1))
-            x_pst[0:3] = 0.45
-            x_vel = np.zeros((self.model.n, 1))
-            x_vel[3:6] = 0.038
-            x_qt = np.zeros((self.model.n, 1))
-            x_qt[6:10] = 0.1
-            x_w = np.zeros((self.model.n, 1))
-            x_w[10:13] = 0.04
-            x_noise = x_pst * np.random.rand(13,1) + x_vel * np.random.rand(13,1) + x_qt * np.random.rand(13,1) + x_w * np.random.rand(13,1)
-            u, error = self.controller(x + x_noise, i * self.dt)
+            # x_pst = np.zeros((self.model.n, 1))
+            # x_pst[0:3] = 0.45
+            # x_vel = np.zeros((self.model.n, 1))
+            # x_vel[3:6] = 0.038
+            # x_qt = np.zeros((self.model.n, 1))
+            # x_qt[6:10] = 0.1
+            # x_w = np.zeros((self.model.n, 1))
+            # x_w[10:13] = 0.04
+            # x_noise = x_pst * np.random.rand(13,1) + x_vel * np.random.rand(13,1) + x_qt * np.random.rand(13,1) + x_w * np.random.rand(13,1)
+            # u, error = self.controller(x + 0.5 * x_noise, i * self.dt)
+            u, error = self.controller(x, i * self.dt)
             x_next = self.dynamics(x, u)
             x_next[6:10] = x_next[6:10] / ca.norm_2(x_next[6:10])
 
@@ -150,6 +150,9 @@ class EmbeddedSimEnvironment(object):
         t = self.t
         x_vec = self.e_vec
         u_vec = self.u_vec
+
+        print(x_vec[:, -1])
+        print(np.linalg.norm(x_vec[:, -1]))
 
         fig, (ax1, ax2, ax3, ax4) = plt.subplots(4)
         fig2, (ax5, ax6) = plt.subplots(2)

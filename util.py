@@ -9,7 +9,6 @@ import numpy as np
 def skew(v):
     """
     Returns the skew matrix of a vector v
-
     :param v: vector
     :type v: ca.MX
     :return: skew matrix of v

@@ -59,8 +59,8 @@ class MPC(object):
 
         build_solver_time = -time.time()
         self.model = model
-        self.model.mass = 9.65
-        self.model.inertia = np.diag([0.1550, 0.1430, 0.1620])
+        # self.model.mass = 9.65
+        # self.model.inertia = np.diag([0.1550, 0.1430, 0.1620])
         self.dt = model.dt
         self.Nx, self.Nu = model.n, model.m
         self.Nt = N
@@ -192,6 +192,11 @@ class MPC(object):
             'verbose': False,
             'expand': True
         }
+        # options = {
+        #     'print_time': False,
+        #     'verbose': False,
+        #     'expand': True,
+        # }
         if solver_opts is not None:
             options.update(solver_opts)
         self.solver = ca.nlpsol('mpc_solver', 'ipopt', nlp, options)
@@ -214,7 +219,7 @@ class MPC(object):
         :type param: string
         """
 
-        if param not in ['P1', 'P2', 'P3']:
+        if param not in ['P0', 'P1', 'P2', 'P3', 'P4']:
             print("Wrong param option. Select param='P1' or 'P2' or 'P3'.")
             exit()
 
